@@ -35,7 +35,7 @@
         errorMessage = null;
 
         try {
-            const response = await fetch("http://localhost:8000/predict_image/", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/segment/`, {
                 method: "POST",
                 body: formData,
             });
