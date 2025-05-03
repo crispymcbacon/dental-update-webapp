@@ -5,6 +5,7 @@
 	export let onDelete;
 	export let toothData;
 	export let panMode;
+	export let deleteMode = null;
 
 	// Calculate scale factor based on image dimensions
 	$: scaleFactor = Math.max(toothData.image_size[0] / 1000, toothData.image_size[1] / 1000);
@@ -105,7 +106,11 @@
 
 	function handleInteraction(event) {
 		if (panMode) return;
-		onDrag(event, tooth);
+		if (deleteMode === 'tooth') {
+			onDelete(tooth);
+		} else {
+			onDrag(event, tooth);
+		}
 	}
 </script>
 

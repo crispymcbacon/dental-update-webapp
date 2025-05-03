@@ -6,6 +6,7 @@
 	export let toothData;
 	export let panMode;
 	export let pointKey; // 'apex_points' or 'base_points'
+	export let deleteMode = null;
 
 	// Calculate scale factor based on image dimensions
 	$: scaleFactor = Math.max(toothData.image_size[0] / 1000, toothData.image_size[1] / 1000);
@@ -53,7 +54,12 @@
 
 	function handleInteraction(event) {
 		if (panMode) return;
-		onDrag(event, point, pointKey);
+		const currentPointType = point.type; // 'apex' or 'base'
+		if (deleteMode === currentPointType) {
+			onDelete(point, pointKey);
+		} else {
+			onDrag(event, point, pointKey);
+		}
 	}
 </script>
 
