@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import ToothLabel from '$lib/components/ToothLabel.svelte';
 	import { ZoomIn, ZoomOut, Move } from 'lucide-svelte';
+	import { callSegmentationApi } from '$lib/api.js';
 
 	// Data and state variables
 	let originalImageSrc = null;
@@ -10,6 +11,7 @@
 	let isLoading = false;
 	let errorMessage = null;
 	let originalFileName = '';
+	let selectedViewType = 'frontal';
 
 	// History management
 	let history = [];
@@ -28,64 +30,23 @@
 		};
 		reader.readAsDataURL(file);
 
-		const formData = new FormData();
-		formData.append('image', file);
-
 		isLoading = true;
 		errorMessage = null;
 		maskImageSrc = null; // Reset visuals
 		toothData = null;
 
 		try {
-			const response = await fetch(`${import.meta.env.VITE_API_URL}/segment/`, {
-				method: 'POST',
-				body: formData
-			});
+			const { maskImageSrc: newMaskImageSrc, toothData: newToothData } = await callSegmentationApi(file, selectedViewType);
+			maskImageSrc = newMaskImageSrc;
+			toothData = newToothData;
 
-			const responseText = await response.text();
-
-			if (!response.ok) {
-				console.error('API Error Status:', response.status);
-				console.error('API Error Response Text:', responseText);
-				// Try to parse as JSON if possible, otherwise use text
-				let detail = responseText;
-				try {
-					const errorJson = JSON.parse(responseText);
-					detail = errorJson.detail || responseText;
-				} catch (parseError) {}
-				throw new Error(`HTTP error! Status: ${response.status}. Detail: ${detail}`);
-			}
-
-			// Now parse the text as JSON
-			const data = JSON.parse(responseText);
-
-			// Check if the expected keys exist
-			if (!data || typeof data.mask_base64 === 'undefined' || typeof data.teeth === 'undefined') {
-				console.error('API response missing expected keys or invalid format:', data);
-				throw new Error('Invalid API response format.');
-			}
-
-			maskImageSrc = `data:image/png;base64,${data.mask_base64}`; // Use correct key
-			toothData = {
-				image_size: data.image_size,
-				teeth: data.teeth,
-				view: data.view,
-				message: data.message // Include message if present
-				// Note: No mask_base64 needed inside toothData structure typically
-			};
+			console.log('toothData', toothData);
 
 			// Assuming history stores objects similar to toothData
 			history = [JSON.parse(JSON.stringify(toothData))];
 			currentIndex = 0;
 		} catch (error) {
-			console.error('Error calling API:', error);
-			if (error instanceof SyntaxError) {
-				errorMessage = 'Failed to parse API response. Please check server logs.';
-			} else if (error.message.includes('HTTP error')) {
-				errorMessage = `API request failed: ${error.message}`;
-			} else {
-				errorMessage = 'An unexpected error occurred. Please try again.';
-			}
+			errorMessage = error.message;
 		} finally {
 			isLoading = false;
 		}
@@ -321,6 +282,14 @@
 {#if originalImageSrc && maskImageSrc && toothData}
 	<div class="flex">
 		<div class="flex min-h-screen w-64 flex-col gap-4 bg-gray-50 p-4">
+			<select bind:value={selectedViewType} class="mb-4 p-2 border rounded w-full">
+				<option value="frontal">Vista frontale</option>
+				<option value="left">Lato sinistro</option>
+				<option value="right">Lato destro</option>
+				<option value="upper">Mascella superiore</option>
+				<option value="lower">Mascella inferiore</option>
+			</select>
+
 			<input
 				type="file"
 				accept="image/*"
@@ -330,16 +299,16 @@
 
 			<div class="flex flex-col gap-2.5">
 				<div class="flex items-center gap-2.5">
-					<span class="min-w-[80px] font-medium text-gray-600">Original:</span>
-					<span>✓ Loaded</span>
+					<span class="min-w-[80px] font-medium text-gray-600">Originale:</span>
+					<span>✓ Caricato</span>
 				</div>
 				<div class="flex items-center gap-2.5">
-					<span class="min-w-[80px] font-medium text-gray-600">Mask:</span>
-					<span>✓ Loaded</span>
+					<span class="min-w-[80px] font-medium text-gray-600">Maschera:</span>
+					<span>✓ Caricato</span>
 				</div>
 				<div class="flex items-center gap-2.5">
 					<span class="min-w-[80px] font-medium text-gray-600">JSON:</span>
-					<span>✓ Loaded ({toothData.teeth?.length || 0})</span>
+					<span>✓ Caricato ({toothData.teeth?.length || 0})</span>
 				</div>
 			</div>
 
@@ -347,19 +316,19 @@
 				<button
 					class="w-full cursor-pointer rounded border-none bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
 					on:click={undo}
-					disabled={currentIndex <= 0}>Undo</button
+					disabled={currentIndex <= 0}>Annulla</button
 				>
 				<button
 					class="w-full cursor-pointer rounded border-none bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
-					on:click={enableAddMode}>Add Tooth</button
+					on:click={enableAddMode}>Aggiungi dente</button
 				>
 				<button
 					class="w-full cursor-pointer rounded border-none bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
-					on:click={downloadJson}>Save JSON</button
+					on:click={downloadJson}>Salva JSON</button
 				>
 				<button
 					class="w-full cursor-pointer rounded border-none bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
-					on:click={downloadMask}>Download Mask</button
+					on:click={downloadMask}>Scarica maschera</button
 				>
 			</div>
 		</div>
@@ -382,10 +351,10 @@
 					<!-- Content container with transform -->
 					<div class="origin-top-left" style="transform: scale({scale});">
 						<div class="relative inline-block">
-							<img src={originalImageSrc} alt="Original Dental X-Ray" class="block h-auto w-auto" />
+							<img src={originalImageSrc} alt="Radiografia dentale originale" class="block h-auto w-auto" />
 							<img
 								src={maskImageSrc}
-								alt="Mask Overlay"
+								alt="Maschera di sovrapposizione"
 								class="absolute left-0 top-0 opacity-50 mix-blend-multiply"
 							/>
 							<svg
@@ -400,7 +369,7 @@
 								}}
 								tabindex="0"
 								role="button"
-								aria-label="Interactive dental x-ray image"
+								aria-label="Immagine radiografica dentale interattiva"
 								viewBox="0 0 {toothData.image_size[1]} {toothData.image_size[0]}"
 							>
 								{#each toothData?.teeth || [] as tooth}
@@ -433,7 +402,7 @@
 							? 'bg-blue-700'
 							: 'bg-blue-500'} px-3 py-1 text-sm text-white transition-colors hover:bg-blue-600"
 						on:click={togglePanMode}
-						title="Toggle Pan Mode"
+						title="Attiva/disattiva modalità panning"
 					>
 						<Move class="h-5 w-5" />
 					</button>
@@ -451,6 +420,14 @@
 {:else}
 	<div class="flex">
 		<div class="min-h-screen w-64 bg-gray-50 p-4">
+			<select bind:value={selectedViewType} class="mb-4 p-2 border rounded w-full">
+				<option value="frontal">Vista frontale</option>
+				<option value="left">Lato sinistro</option>
+				<option value="right">Lato destro</option>
+				<option value="upper">Mascella superiore</option>
+				<option value="lower">Mascella inferiore</option>
+			</select>
+
 			<input
 				type="file"
 				accept="image/*"
@@ -459,21 +436,21 @@
 			/>
 
 			{#if isLoading}
-				<p class="mt-4 text-gray-500">Loading data from API...</p>
+				<p class="mt-4 text-gray-500">Caricamento dati da API...</p>
 			{:else if errorMessage}
 				<p class="mt-4 text-red-500">{errorMessage}</p>
 			{:else}
-				<p class="mt-4 text-gray-500">Please upload an image to begin</p>
+				<p class="mt-4 text-gray-500">Per favore, carica un'immagine per iniziare</p>
 			{/if}
 		</div>
 
 		<div class="flex-1 p-5">
 			{#if isLoading}
-				<p class="text-gray-500">Please wait, processing image...</p>
+				<p class="text-gray-500">Per favore, attendi, elaborazione dell'immagine...</p>
 			{:else if errorMessage}
-				<p class="text-red-500">Error: {errorMessage}</p>
+				<p class="text-red-500">Errore: {errorMessage}</p>
 			{:else}
-				<p class="text-gray-500">No data available, please upload an image</p>
+				<p class="text-gray-500">Nessun dato disponibile, per favore carica un'immagine</p>
 			{/if}
 		</div>
 	</div>
