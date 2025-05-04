@@ -15,14 +15,7 @@
 		zoomOut as zOut
 	} from '$lib/logic/teeth';
 
-	import {
-		randomColor,
-		setupCanvas,
-		beginStroke,
-		continueStroke,
-		downloadMergedMask,
-		createZipBlob
-	} from '$lib/logic/canvas';
+	import { createZipBlob } from '$lib/logic/canvas';
 
 	import ToothLabel from '$lib/components/ToothLabel.svelte';
 	import PointLabel from '$lib/components/PointLabel.svelte';
@@ -40,43 +33,14 @@
 	let deleteMode: 'tooth' | 'apex' | 'base' | null = null;
 	let pendingData: { type: 'tooth' | 'apex' | 'base'; number: number } | null = null;
 
-	/* ---------- segmentation canvas ---------- */
 	let segMode = false;
-	let drawingCanvas: HTMLCanvasElement;
-	let ctx: CanvasRenderingContext2D;
-	let isDrawing = false;
-	let drawColor = randomColor();
 
 	function toggleSegMode() {
 		segMode = !segMode;
-
-		if (segMode) {
-			// wait DOM, then initialise canvas
-			tick().then(() => {
-				drawingCanvas = document.getElementById('drawCanvas') as HTMLCanvasElement;
-				ctx = setupCanvas(drawingCanvas, toothData.image_size, drawColor);
-
-				drawingCanvas.addEventListener('mousedown', handleStartDraw);
-				drawingCanvas.addEventListener('mousemove', handleDraw);
-				drawingCanvas.addEventListener('mouseup', stopDraw);
-				drawingCanvas.addEventListener('mouseleave', stopDraw);
-			});
-		}
-	}
-
-	function handleStartDraw(e) {
-		isDrawing = beginStroke(e, ctx, drawingCanvas);
-	}
-	function handleDraw(e) {
-		continueStroke(e, ctx, drawingCanvas, isDrawing);
-	}
-	function stopDraw() {
-		isDrawing = false;
 	}
 
 	function newFreeArea() {
-		drawColor = randomColor();
-		if (ctx) ctx.strokeStyle = drawColor;
+		console.warn('New Area functionality needs reimplementation.');
 	}
 
 	/* ---------- helpers ---------- */
@@ -235,18 +199,11 @@
 		URL.revokeObjectURL(a.href);
 	}
 
-	function saveMask() {
-		downloadMergedMask(
-			drawingCanvas,
-			maskImageSrc,
-			originalFilename?.replace(/\.[^.]+$/, '') || 'image'
-		);
-	}
 
 	async function saveZip() {
 		try {
 			const baseFilename = originalFilename?.replace(/\.[^.]+$/, '') || 'data';
-			const blob = await createZipBlob(drawingCanvas, maskImageSrc, toothData, baseFilename);
+			const blob = await createZipBlob(null, maskImageSrc, toothData, baseFilename);
 			const a = Object.assign(document.createElement('a'), {
 				href: URL.createObjectURL(blob),
 				download: `${baseFilename}_archive.zip`
@@ -322,7 +279,7 @@
 		</button>
 		{#if segMode}
 			<button class="btn" on:click={newFreeArea}>Nuova Area</button>
-			<button class="btn" on:click={saveMask}>Scarica Maschera</button>
+			<button class="btn" on:click={() => alert('Scarica Maschera functionality needs reimplementation.')}>Scarica Maschera</button>
 		{/if}
 		<hr class="my-2" />
 		<button class="btn" on:click={saveJson}>Salva JSON</button>
@@ -392,9 +349,6 @@
 							{/if}
 						</svg>
 
-						{#if segMode}
-							<canvas id="drawCanvas" class="pointer-events-auto absolute inset-0"></canvas>
-						{/if}
 					</div>
 				</div>
 			</div>
