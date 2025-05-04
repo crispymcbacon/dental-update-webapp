@@ -226,9 +226,15 @@
 	<aside class="w-64 shrink-0 bg-gray-50 p-4 space-y-2">
 		<button class="btn" on:click={undo} disabled={$teethStore.index <= 0}>Annulla</button>
 
-		<button class="btn" class:active={addMode==='tooth'} on:click={()=>enableAdd('tooth')}>+ Dente</button>
-		<button class="btn" class:active={addMode==='apex'}  on:click={()=>enableAdd('apex')}>+ Apice</button>
-		<button class="btn" class:active={addMode==='base'}  on:click={()=>enableAdd('base')}>+ Base</button>
+		<button class="btn" class:active={addMode === 'apex'} on:click={() => enableAdd('apex')}
+			>+ 🔵 Apice</button
+		>
+		<button class="btn" class:active={addMode === 'tooth'} on:click={() => enableAdd('tooth')}
+			>+ 🔴 Dente</button
+		>
+		<button class="btn" class:active={addMode === 'base'} on:click={() => enableAdd('base')}
+			>+ 🟢 Base</button
+		>
 
 		<button class="btn red" class:active={deleteMode==='tooth'} on:click={()=>enableDelete('tooth')}>Elimina Dente</button>
 		<button class="btn red" class:active={deleteMode==='apex'}  on:click={()=>enableDelete('apex')}>Elimina Apice</button>

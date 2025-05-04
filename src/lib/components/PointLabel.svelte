@@ -54,7 +54,7 @@
 
 	function handleInteraction(event) {
 		if (panMode) return;
-		const currentPointType = point.type; // 'apex' or 'base'
+		const currentPointType = point.type;
 		if (deleteMode === currentPointType) {
 			onDelete(point, pointKey);
 		} else {

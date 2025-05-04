@@ -87,17 +87,20 @@ export function addPoint(data, type /* 'apex' | 'base' */, toothNumber, { x, y }
 	const d   = clone(data);
 
 	// init array if missing
-	if (!d[key]) d[key] = [];
+	if (!d[key]) {
+		d[key] = [];
+	}
 
 	if (d[key].some(p => p.tooth_number === toothNumber))
 		throw new Error(`${type} already exists for tooth ${toothNumber}`);
 
-	d[key].push({
+	const newPoint = {
 		point_id    : nextPointId(d[key]),
 		tooth_number: toothNumber,
 		position    : [x, y],
 		type
-	});
+	};
+	d[key].push(newPoint);
 	return d;
 }
 

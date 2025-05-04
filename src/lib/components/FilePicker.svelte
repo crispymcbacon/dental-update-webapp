@@ -17,7 +17,38 @@
 
 			teethStore.setOriginal(origSrc, originalFile.name);
 			teethStore.setMask(maskSrc);
-			teethStore.setToothData(JSON.parse(await jsonFile.text()));
+			const loadedData = JSON.parse(await jsonFile.text());
+
+			// --- Data Transformation ---
+			const transformedData = { ...loadedData, apex_points: [], base_points: [] };
+			let pointIdCounter = 1; // Simple counter for unique IDs
+
+			if (transformedData.teeth && Array.isArray(transformedData.teeth)) {
+				transformedData.teeth.forEach(tooth => {
+					if (tooth.apex && Array.isArray(tooth.apex)) {
+						transformedData.apex_points.push({
+							point_id: pointIdCounter++,
+							tooth_number: tooth.tooth_number,
+							position: tooth.apex,
+							type: 'apex'
+						});
+					}
+					if (tooth.base && Array.isArray(tooth.base)) {
+						transformedData.base_points.push({
+							point_id: pointIdCounter++,
+							tooth_number: tooth.tooth_number,
+							position: tooth.base,
+							type: 'base'
+						});
+					}
+					// Optional: Remove original apex/base from tooth object if desired
+					// delete tooth.apex;
+					// delete tooth.base;
+				});
+			}
+			// --- End Transformation ---
+
+			teethStore.setToothData(transformedData); // Use transformed data
 		} catch (e) {
 			error = e;
 		}
