@@ -33,12 +33,6 @@
 	let deleteMode: 'tooth' | 'apex' | 'base' | null = null;
 	let pendingData: { type: 'tooth' | 'apex' | 'base'; number: number } | null = null;
 
-	let segMode = false;
-
-	function toggleSegMode() {
-		segMode = !segMode;
-	}
-
 	function newFreeArea() {
 		console.warn('New Area functionality needs reimplementation.');
 	}
@@ -274,13 +268,8 @@
 
 		<hr class="my-2" />
 
-		<button class="btn white" on:click={toggleSegMode}>
-			{segMode ? 'Esci Segmentazione' : 'Modalità Segmentazione'}
-		</button>
-		{#if segMode}
-			<button class="btn" on:click={newFreeArea}>Nuova Area</button>
-			<button class="btn" on:click={() => alert('Scarica Maschera functionality needs reimplementation.')}>Scarica Maschera</button>
-		{/if}
+		<button class="btn" on:click={newFreeArea}>Nuova Area</button>
+		<button class="btn" on:click={() => console.warn('Cancella Area functionality needs reimplementation.')}>Cancella Area</button>
 		<hr class="my-2" />
 		<button class="btn" on:click={saveJson}>Salva JSON</button>
 		<!-- Disable if essential data for zip is missing -->
