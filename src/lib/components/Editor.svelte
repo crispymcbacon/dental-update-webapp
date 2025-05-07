@@ -16,6 +16,7 @@
 	} from '$lib/logic/teeth';
 
 	import { createZipBlob } from '$lib/logic/canvas';
+	import { getRandomColor } from '$lib/drawing.js';
 
 	import ToothLabel from '$lib/components/ToothLabel.svelte';
 	import PointLabel from '$lib/components/PointLabel.svelte';
@@ -33,8 +34,79 @@
 	let deleteMode: 'tooth' | 'apex' | 'base' | null = null;
 	let pendingData: { type: 'tooth' | 'apex' | 'base'; number: number } | null = null;
 
+	// --- Drawing/Erasing state ---
+	let drawingMode: 'idle' | 'draw' | 'erase' = 'idle';
+	let isDrawing = false;
+	let currentColor = '#ff0000';
+	let visualLineWidth = 18; // px, as seen on screen
+	let canvasEl: HTMLCanvasElement;
+	let canvasCtx: CanvasRenderingContext2D | null = null;
+
+	// --- Canvas initialization and scaling helpers ---
+	function setupDrawingCanvas() {
+		if (!canvasEl || !toothData?.image_size) return;
+		canvasEl.width = toothData.image_size[1];
+		canvasEl.height = toothData.image_size[0];
+		canvasCtx = canvasEl.getContext('2d');
+	}
+
+	$: setupDrawingCanvas();
+
+	function getCanvasEventPos(e: MouseEvent | TouchEvent) {
+		const rect = canvasEl.getBoundingClientRect();
+		const clientX = (e as TouchEvent).touches?.[0]?.clientX ?? (e as MouseEvent).clientX;
+		const clientY = (e as TouchEvent).touches?.[0]?.clientY ?? (e as MouseEvent).clientY;
+		const scaleX = canvasEl.width / rect.width;
+		const scaleY = canvasEl.height / rect.height;
+		return {
+			x: (clientX - rect.left) * scaleX,
+			y: (clientY - rect.top) * scaleY,
+			intrinsicLineWidth: visualLineWidth * scaleX // use scaleX for brush
+		};
+	}
+
+	function handleCanvasPointerDown(e) {
+		if (drawingMode === 'idle' || !canvasCtx) return;
+		isDrawing = true;
+		const { x, y, intrinsicLineWidth } = getCanvasEventPos(e);
+		canvasCtx.lineCap = 'round';
+		canvasCtx.lineJoin = 'round';
+		canvasCtx.lineWidth = intrinsicLineWidth;
+		canvasCtx.strokeStyle = drawingMode === 'draw' ? currentColor : '#000';
+		canvasCtx.globalCompositeOperation = drawingMode === 'draw' ? 'source-over' : 'destination-out';
+		canvasCtx.beginPath();
+		canvasCtx.moveTo(x, y);
+	}
+
+	function handleCanvasPointerMove(e) {
+		if (!isDrawing || !canvasCtx) return;
+		const { x, y, intrinsicLineWidth } = getCanvasEventPos(e);
+		canvasCtx.lineWidth = intrinsicLineWidth;
+		canvasCtx.lineTo(x, y);
+		canvasCtx.stroke();
+	}
+
+	function handleCanvasPointerUp(e) {
+		if (!isDrawing || !canvasCtx) return;
+		isDrawing = false;
+		canvasCtx.closePath();
+	}
+
 	function newFreeArea() {
-		console.warn('New Area functionality needs reimplementation.');
+		if (drawingMode !== 'draw') {
+			currentColor = getRandomColor();
+			drawingMode = 'draw';
+		} else {
+			drawingMode = 'idle';
+		}
+	}
+
+	function eraseArea() {
+		if (drawingMode !== 'erase') {
+			drawingMode = 'erase';
+		} else {
+			drawingMode = 'idle';
+		}
 	}
 
 	/* ---------- helpers ---------- */
@@ -197,7 +269,7 @@
 	async function saveZip() {
 		try {
 			const baseFilename = originalFilename?.replace(/\.[^.]+$/, '') || 'data';
-			const blob = await createZipBlob(null, maskImageSrc, toothData, baseFilename);
+			const blob = await createZipBlob(canvasEl, maskImageSrc, toothData, baseFilename);
 			const a = Object.assign(document.createElement('a'), {
 				href: URL.createObjectURL(blob),
 				download: `${baseFilename}_archive.zip`
@@ -268,8 +340,21 @@
 
 		<hr class="my-2" />
 
-		<button class="btn" on:click={newFreeArea}>Nuova Area</button>
-		<button class="btn" on:click={() => console.warn('Cancella Area functionality needs reimplementation.')}>Cancella Area</button>
+		<button
+			class="btn"
+			class:active={drawingMode === 'draw'}
+			style="background: {drawingMode === 'draw' ? currentColor : ''}"
+			on:click={newFreeArea}
+		>
+			{drawingMode === 'draw' ? 'Fine' : 'Nuova Area'}
+		</button>
+		<button
+			class="btn"
+			class:active={drawingMode === 'erase'}
+			on:click={eraseArea}
+		>
+			{drawingMode === 'erase' ? 'Fine' : 'Cancella Area'}
+		</button>
 		<hr class="my-2" />
 		<button class="btn" on:click={saveJson}>Salva JSON</button>
 		<!-- Disable if essential data for zip is missing -->
@@ -292,6 +377,20 @@
 					<div class="relative inline-block">
 						<img src={originalImageSrc} />
 						<img src={maskImageSrc} class="absolute inset-0 opacity-50 mix-blend-multiply" />
+
+						<!-- Drawing/Erasing Canvas Overlay -->
+						<canvas
+							bind:this={canvasEl}
+							class="absolute inset-0 pointer-events-auto"
+							style="touch-action:none; z-index:10;"
+							on:mousedown={handleCanvasPointerDown}
+							on:mousemove={handleCanvasPointerMove}
+							on:mouseup={handleCanvasPointerUp}
+							on:mouseleave={handleCanvasPointerUp}
+							on:touchstart|preventDefault={handleCanvasPointerDown}
+							on:touchmove|preventDefault={handleCanvasPointerMove}
+							on:touchend|preventDefault={handleCanvasPointerUp}
+						></canvas>
 
 						<!-- SVG overlay -->
 						<svg
