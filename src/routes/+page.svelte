@@ -53,49 +53,27 @@
 			</div>
 
 			<!-- Tools Section -->
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<!-- Segmentation Card -->
+			<div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+				<!-- New Merged Tool Card -->
 				<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
 					<div class="p-6">
 						<div class="flex items-center justify-center h-32 mb-4 bg-blue-50 rounded-lg">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
 							</svg>
-						</div>
-						<h3 class="text-xl font-semibold text-gray-800 mb-2">Segmentazione</h3>
-						<p class="text-gray-600 mb-4">
-							Identifica i denti da un'immagine utilizzando strumenti di intelligenza artificiale.
-						</p>
-						<button
-							on:click={() => navigateTo('/predict')}
-							class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-300 flex items-center justify-center"
-							
-						>
-							<span>Inizia Segmentazione</span>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-							</svg>
-						</button>
-					</div>
-				</div>
-
-				<!-- Annotation Card -->
-				<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-					<div class="p-6">
-						<div class="flex items-center justify-center h-32 mb-4 bg-blue-50 rounded-lg">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
 							</svg>
 						</div>
-						<h3 class="text-xl font-semibold text-gray-800 mb-2">Annotazione</h3>
+						<h3 class="text-xl font-semibold text-gray-800 mb-2">Segmentazione e Annotazione</h3>
 						<p class="text-gray-600 mb-4">
-							Accedi agli strumenti per etichettare e modificare i dati manualmente.
+							Accedi alla nuova interfaccia per segmentare e annotare immagini dentali.
 						</p>
 						<button
-							on:click={() => navigateTo('/label')}
-							class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-300 flex items-center justify-center"
+							on:click={() => navigateTo('/teeth/')}
+							class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-300 flex items-center justify-center"
 						>
-							<span>Inizia Annotazione</span>
+							<span>Vai alla Pagina</span>
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
 								<path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
 							</svg>
@@ -128,6 +106,65 @@
 								<path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
 							</svg>
 						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Legacy Tools Section -->
+		<div class="max-w-4xl mx-auto mt-12 mb-8">
+			<div class="bg-gray-100 rounded-lg shadow-md p-6">
+				<h2 class="text-xl font-semibold text-gray-700 mb-3">Strumenti Legacy</h2>
+				<p class="text-gray-600 mb-6">
+					Le seguenti sezioni di segmentazione e annotazione sono deprecate e verranno rimosse in futuro. Si consiglia di utilizzare la nuova pagina unificata.
+				</p>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<!-- Legacy Segmentation Card -->
+					<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+						<div class="p-6">
+							<div class="flex items-center justify-center h-32 mb-4 bg-blue-50 rounded-lg">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-semibold text-gray-800 mb-2">Segmentazione (Legacy)</h3>
+							<p class="text-gray-600 mb-4">
+								Identifica i denti da un'immagine utilizzando strumenti di intelligenza artificiale.
+							</p>
+							<button
+								on:click={() => navigateTo('/predict')}
+								class="w-full py-2 px-4 bg-gray-400 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-300 flex items-center justify-center"
+							>
+								<span>Inizia Segmentazione (Legacy)</span>
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+									<path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+								</svg>
+							</button>
+						</div>
+					</div>
+
+					<!-- Legacy Annotation Card -->
+					<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+						<div class="p-6">
+							<div class="flex items-center justify-center h-32 mb-4 bg-blue-50 rounded-lg">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-semibold text-gray-800 mb-2">Annotazione (Legacy)</h3>
+							<p class="text-gray-600 mb-4">
+								Accedi agli strumenti per etichettare e modificare i dati manualmente.
+							</p>
+							<button
+								on:click={() => navigateTo('/label')}
+								class="w-full py-2 px-4 bg-gray-400 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-300 flex items-center justify-center"
+							>
+								<span>Inizia Annotazione (Legacy)</span>
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+									<path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+								</svg>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
